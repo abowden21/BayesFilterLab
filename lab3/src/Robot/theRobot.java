@@ -425,19 +425,29 @@ public class theRobot extends JFrame {
         for (int y = 0; y < numRows; y++) {
             for (int x = 0; x < numCols; x++) {
 
+                // if we hit a wall, it should stay 0
                 if (previousProbabilities[x][y] == 0) {
+                    currentProbabilities[x][y] = 0;
                     continue;
                 }
+
                 currentProbabilities[x][y] = transitionModelValue(action, previousProbabilities, x, y);
 
                 currentProbabilities[x][y] = sensorModel(sonars, x, y) * currentProbabilities[x][y];
-                //normalize it after
             }
 
             //take care of case when we are at a goal
         }
+        currentProbabilities = normalize(currentProbabilities);
 
         return currentProbabilities;
+    }
+
+    double[][] normalize(double[][] probs) {
+        // double for loop to sum
+
+        // double for loop to divide each spot by the sum
+        return probs;
     }
 
     double transitionModelValue(int action, double[][] previousProbabilities, int x, int y) {
@@ -629,7 +639,7 @@ public class theRobot extends JFrame {
         //if its correct times totalProbability by prob of being correct
         //if incorrect times prob by prob of being incorrect
 
-        return 0;
+        return 1;
     }
 
     // This is the function you'd need to write to make the robot move using your AI;
