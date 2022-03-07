@@ -444,9 +444,20 @@ public class theRobot extends JFrame {
     }
 
     double[][] normalize(double[][] probs) {
+        double sum = 0;
         // double for loop to sum
+        for (int x = 0; x < probs[0].length; x++) {
+            for (int y = 0; y < probs.length; y++) {
+                sum += probs[x][y];
+            }
+        }
 
         // double for loop to divide each spot by the sum
+        for (int x = 0; x < probs[0].length; x++) {
+            for (int y = 0; y < probs.length; y++) {
+                probs[x][y] = probs[x][y] / sum;
+            }
+        }
         return probs;
     }
 
