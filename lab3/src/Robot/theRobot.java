@@ -422,6 +422,8 @@ public class theRobot extends JFrame {
         int numCols = previousProbabilities[0].length;
         double[][] currentProbabilities = new double[numRows][numCols];
 
+        // create function for zeroing probabilities at stairwells and goals
+
         for (int y = 0; y < numRows; y++) {
             for (int x = 0; x < numCols; x++) {
 
@@ -466,26 +468,26 @@ public class theRobot extends JFrame {
         double otherActionProb = (1-moveProb) / 4;
 
         // check if any neighbors are walls
-        int numNeighbors = 4;
+//        int numNeighbors = 4;
         boolean northNeighbor = true;
         boolean southNeighbor = true;
         boolean eastNeighbor = true;
         boolean westNeighbor = true;
 
         if (x-1 <= 0 || mundo.grid[x-1][y] == 0) {
-            numNeighbors--;
+//            numNeighbors--;
             westNeighbor = false;
         }
         if (x+1 >= mundo.width || mundo.grid[x+1][y] == 0) {
-            numNeighbors--;
+//            numNeighbors--;
             eastNeighbor = false;
         }
         if (y-1 <= 0 || mundo.grid[x][y-1] == 0) {
-            numNeighbors--;
+//            numNeighbors--;
             northNeighbor = false;
         }
         if (y+1 >= mundo.height || mundo.grid[x][y+1] == 0) {
-            numNeighbors--;
+//            numNeighbors--;
             southNeighbor = false;
         }
 
@@ -642,15 +644,98 @@ public class theRobot extends JFrame {
 
     //p(z|x)
     double sensorModel(String sonars, int row, int column) {
-        double normalize;
-
-        // normalize = 1 / total probabilities of your states
-
+        double totalProb = 1;
         //for every direction sonar
-        //if its correct times totalProbability by prob of being correct
-        //if incorrect times prob by prob of being incorrect
 
-        return 1;
+        // NORTH
+        if (sonars.charAt(0) == '1') {
+            if (mundo.grid[row-1][column] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[row-1][column] == 2 || mundo.grid[row-1][column] == 0 || mundo.grid[row-1][column] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        // SOUTH
+        if (sonars.charAt(1) == '1') {
+            if (mundo.grid[row+1][column] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[row+1][column] == 2 || mundo.grid[row+1][column] == 0 || mundo.grid[row+1][column] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        // EAST
+        if (sonars.charAt(2) == '1') {
+            if (mundo.grid[row][column+1] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[row][column+1] == 2 || mundo.grid[row][column+1] == 0 || mundo.grid[row][column+1] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        // WEST
+        if (sonars.charAt(3) == '1') {
+            if (mundo.grid[row][column-1] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[row][column-1] == 2 || mundo.grid[row][column-1] == 0 || mundo.grid[row][column-1] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        return totalProb;
     }
 
     // This is the function you'd need to write to make the robot move using your AI;
