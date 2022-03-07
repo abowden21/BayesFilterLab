@@ -422,7 +422,9 @@ public class theRobot extends JFrame {
         int numCols = previousProbabilities[0].length;
         double[][] currentProbabilities = new double[numRows][numCols];
 
-        // create function for zeroing probabilities at stairwells and goals
+        //  zero probabilities at stairwells and goals: we are still going through the algorithm,
+        //  so we aren't at a goal or stairwell
+        previousProbabilities = zeroGoalStairwells(previousProbabilities);
 
         for (int y = 0; y < numRows; y++) {
             for (int x = 0; x < numCols; x++) {
@@ -443,6 +445,17 @@ public class theRobot extends JFrame {
         currentProbabilities = normalize(currentProbabilities);
 
         return currentProbabilities;
+    }
+
+    double[][] zeroGoalStairwells(double[][] probs) {
+        for (int x = 0; x < probs[0].length; x++) {
+            for (int y = 0; y < probs.length; y++) {
+                 if (mundo.grid[x][y] == 2 || mundo.grid[x][y] == 3) {
+                     probs[x][y] = 0;
+                 }
+            }
+        }
+        return probs;
     }
 
     double[][] normalize(double[][] probs) {
