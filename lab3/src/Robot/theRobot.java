@@ -30,60 +30,60 @@ class mySmartMap extends JComponent implements KeyListener {
     Color gris = new Color(170,170,170);
     Color myWhite = new Color(220, 220, 220);
     World mundo;
-    
+
     int gameStatus;
 
     double[][] probs;
     double[][] vals;
-    
+
     public mySmartMap(int w, int h, World wld) {
         mundo = wld;
         probs = new double[mundo.width][mundo.height];
         vals = new double[mundo.width][mundo.height];
         winWidth = w;
         winHeight = h;
-        
+
         sqrWdth = (double)w / mundo.width;
         sqrHght = (double)h / mundo.height;
         currentKey = -1;
-        
+
         addKeyListener(this);
-        
+
         gameStatus = 0;
     }
-    
+
     public void addNotify() {
         super.addNotify();
         requestFocus();
     }
-    
+
     public void setWin() {
         gameStatus = 1;
         repaint();
     }
-    
+
     public void setLoss() {
         gameStatus = 2;
         repaint();
     }
-    
+
     public void updateProbs(double[][] _probs) {
         for (int y = 0; y < mundo.height; y++) {
             for (int x = 0; x < mundo.width; x++) {
                 probs[x][y] = _probs[x][y];
             }
         }
-        
+
         repaint();
     }
-    
+
     public void updateValues(double[][] _vals) {
         for (int y = 0; y < mundo.height; y++) {
             for (int x = 0; x < mundo.width; x++) {
                 vals[x][y] = _vals[x][y];
             }
         }
-        
+
         repaint();
     }
 
@@ -108,7 +108,7 @@ class mySmartMap extends JComponent implements KeyListener {
                 }
                 else if (mundo.grid[x][y] == 0) {
                     //g.setColor(myWhite);
-                    
+
                     int col = (int)(255 * Math.sqrt(probs[x][y]));
                     if (col > 255)
                         col = 255;
@@ -123,7 +123,7 @@ class mySmartMap extends JComponent implements KeyListener {
                     g.setColor(Color.green);
                     g.fillRect((int)(x * sqrWdth), (int)(y * sqrHght), (int)sqrWdth, (int)sqrHght);
                 }
-            
+
             }
             if (y != 0) {
                 g.setColor(gris);
@@ -131,15 +131,15 @@ class mySmartMap extends JComponent implements KeyListener {
             }
         }
         for (int x = 0; x < mundo.width; x++) {
-                g.setColor(gris);
-                g.drawLine((int)(x * sqrWdth), 0, (int)(x * sqrWdth), (int)winHeight);
+            g.setColor(gris);
+            g.drawLine((int)(x * sqrWdth), 0, (int)(x * sqrWdth), (int)winHeight);
         }
-        
+
         //System.out.println("repaint maxProb: " + maxProbs + "; " + mx + ", " + my);
-        
+
         g.setColor(Color.green);
         g.drawOval((int)(mx * sqrWdth)+1, (int)(my * sqrHght)+1, (int)(sqrWdth-1.4), (int)(sqrHght-1.4));
-        
+
         if (gameStatus == 1) {
             g.setColor(Color.green);
             g.drawString("You Won!", 8, 25);
@@ -149,16 +149,16 @@ class mySmartMap extends JComponent implements KeyListener {
             g.drawString("You're a Loser!", 8, 25);
         }
     }
-    
+
     public void paintValues(Graphics g) {
         double maxVal = -99999, minVal = 99999;
         int mx = 0, my = 0;
-        
+
         for (int y = 0; y < mundo.height; y++) {
             for (int x = 0; x < mundo.width; x++) {
                 if (mundo.grid[x][y] != 0)
                     continue;
-                
+
                 if (vals[x][y] > maxVal)
                     maxVal = vals[x][y];
                 if (vals[x][y] < minVal)
@@ -178,7 +178,7 @@ class mySmartMap extends JComponent implements KeyListener {
                 }
                 else if (mundo.grid[x][y] == 0) {
                     //g.setColor(myWhite);
-                    
+
                     //int col = (int)(255 * Math.sqrt((vals[x][y]-minVal)/(maxVal-minVal)));
                     int col = (int)(255 * (vals[x][y]-minVal)/(maxVal-minVal));
                     if (col > 255)
@@ -194,7 +194,7 @@ class mySmartMap extends JComponent implements KeyListener {
                     g.setColor(Color.green);
                     g.fillRect((int)(x * sqrWdth)+offset, (int)(y * sqrHght), (int)sqrWdth, (int)sqrHght);
                 }
-            
+
             }
             if (y != 0) {
                 g.setColor(gris);
@@ -202,12 +202,12 @@ class mySmartMap extends JComponent implements KeyListener {
             }
         }
         for (int x = 0; x < mundo.width; x++) {
-                g.setColor(gris);
-                g.drawLine((int)(x * sqrWdth)+offset, 0, (int)(x * sqrWdth)+offset, (int)winHeight);
+            g.setColor(gris);
+            g.drawLine((int)(x * sqrWdth)+offset, 0, (int)(x * sqrWdth)+offset, (int)winHeight);
         }
     }
 
-    
+
     public void keyPressed(KeyEvent e) {
         //System.out.println("keyPressed");
     }
@@ -217,7 +217,7 @@ class mySmartMap extends JComponent implements KeyListener {
     public void keyTyped(KeyEvent e) {
         char key = e.getKeyChar();
         //System.out.println(key);
-        
+
         switch (key) {
             case 'i':
                 currentKey = NORTH;
@@ -249,31 +249,31 @@ public class theRobot extends JFrame {
     public static final int STAY = 4;
 
     Color bkgroundColor = new Color(230,230,230);
-    
+
     static mySmartMap myMaps; // instance of the class that draw everything to the GUI
     String mundoName;
-    
+
     World mundo; // mundo contains all the information about the world.  See World.java
     double moveProb, sensorAccuracy;  // stores probabilies that the robot moves in the intended direction
-                                      // and the probability that a sonar reading is correct, respectively
-    
+    // and the probability that a sonar reading is correct, respectively
+
     // variables to communicate with the Server via sockets
     public Socket s;
-	public BufferedReader sin;
-	public PrintWriter sout;
-    
+    public BufferedReader sin;
+    public PrintWriter sout;
+
     // variables to store information entered through the command-line about the current scenario
     boolean isManual = false; // determines whether you (manual) or the AI (automatic) controls the robots movements
     boolean knownPosition = false;
     int startX = -1, startY = -1;
     int decisionDelay = 250;
-    
+
     // store your probability map (for position of the robot in this array
     double[][] probs;
-    
+
     // store your computed value of being in each state (x, y)
     double[][] Vs;
-    
+
     public theRobot(String _manual, int _decisionDelay) {
         // initialize variables as specified from the command-line
         if (_manual.equals("automatic"))
@@ -281,13 +281,13 @@ public class theRobot extends JFrame {
         else
             isManual = true;
         decisionDelay = _decisionDelay;
-        
+
         // get a connection to the server and get initial information about the world
         initClient();
-    
+
         // Read in the world
         mundo = new World(mundoName);
-        
+
         // set up the GUI that displays the information you compute
         int width = 500;
         int height = 500;
@@ -298,13 +298,13 @@ public class theRobot extends JFrame {
         setBounds(0, 0, width, height+bar);
         myMaps = new mySmartMap(width, height, mundo);
         getContentPane().add(myMaps);
-        
+
         setVisible(true);
         setTitle("Probability and Value Maps");
-        
+
         doStuff(); // Function to have the robot move about its world until it gets to its goal or falls in a stairwell
     }
-    
+
     // this function establishes a connection with the server and learns
     //   1 -- which world it is in
     //   2 -- it's transition model (specified by moveProb)
@@ -313,19 +313,19 @@ public class theRobot extends JFrame {
     public void initClient() {
         int portNumber = 3333;
         String host = "localhost";
-        
+
         try {
-			s = new Socket(host, portNumber);
+            s = new Socket(host, portNumber);
             sout = new PrintWriter(s.getOutputStream(), true);
-			sin = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            
+            sin = new BufferedReader(new InputStreamReader(s.getInputStream()));
+
             mundoName = sin.readLine();
             moveProb = Double.parseDouble(sin.readLine());
             sensorAccuracy = Double.parseDouble(sin.readLine());
             System.out.println("Need to open the mundo: " + mundoName);
             System.out.println("moveProb: " + moveProb);
             System.out.println("sensorAccuracy: " + sensorAccuracy);
-            
+
             // find out of the robots position is know
             String _known = sin.readLine();
             if (_known.equals("known")) {
@@ -360,12 +360,12 @@ public class theRobot extends JFrame {
         }
         int a = myMaps.currentKey;
         myMaps.currentKey = -1;
-        
+
         System.out.println("Action: " + a);
-        
+
         return a;
     }
-    
+
     // initializes the probabilities of where the AI is
     void initializeProbabilities() {
         probs = new double[mundo.width][mundo.height];
@@ -383,14 +383,14 @@ public class theRobot extends JFrame {
         }
         else {  // otherwise, set up a uniform prior over all the positions in the world that are open spaces
             int count = 0;
-            
+
             for (int y = 0; y < mundo.height; y++) {
                 for (int x = 0; x < mundo.width; x++) {
                     if (mundo.grid[x][y] == 0)
                         count++;
                 }
             }
-            
+
             for (int y = 0; y < mundo.height; y++) {
                 for (int x = 0; x < mundo.width; x++) {
                     if (mundo.grid[x][y] == 0)
@@ -400,21 +400,19 @@ public class theRobot extends JFrame {
                 }
             }
         }
-        
+
         myMaps.updateProbs(probs);
     }
-      // TODO: update the probabilities of where the AI thinks it is based on the action selected and the new sonar readings
+    // TODO: update the probabilities of where the AI thinks it is based on the action selected and the new sonar readings
     //       To do this, you should update the 2D-array "probs"
     // Note: sonars is a bit string with four characters, specifying the sonar reading in the direction of North, South, East, and West
     //       For example, the sonar string 1001, specifies that the sonars found a wall in the North and West directions, but not in the South and East directions
     void updateProbabilities(int action, String sonars) {
-        // your code
         double[][] previousProbabilities = probs.clone();
         probs = bayesFilter(action, sonars, previousProbabilities);
 
-        double moveProb, sensorAccuracy;
-        myMaps.updateProbs(probs); // call this function after updating your probabilities so that the
-                                   //  new probabilities will show up in the probability map on the GUI
+          myMaps.updateProbs(probs); // call this function after updating your probabilities so that the
+        //  new probabilities will show up in the probability map on the GUI
     }
 
     double[][] bayesFilter(int action, String sonars, double[][] previousProbabilities) {
@@ -422,156 +420,367 @@ public class theRobot extends JFrame {
         int numCols = previousProbabilities[0].length;
         double[][] currentProbabilities = new double[numRows][numCols];
 
+        //  zero probabilities at stairwells and goals: we are still going through the algorithm,
+        //  so we aren't at a goal or stairwell
+        previousProbabilities = zeroGoalStairwells(previousProbabilities);
+
         for (int y = 0; y < numRows; y++) {
             for (int x = 0; x < numCols; x++) {
 
-                if (previousProbabilities[x][y] == 0) {
+                // if we hit a wall, it should stay 0
+//                if (previousProbabilities[x][y] == 0) {
+//                    currentProbabilities[x][y] = 0;
+//                    continue;
+//                }
+                if (mundo.grid[x][y] == 1) {
                     continue;
                 }
-                currentProbabilities[x][y] = transitionModelValue(action, previousProbabilities, x, y) * previousProbabilities[x][y];
 
-                currentProbabilities[x][y] = sensorModel(sonars, x, y) * previousProbabilities[x][y];
-                //normalize it after
+                currentProbabilities[x][y] = transitionModelValue(action, previousProbabilities, x, y);
+
+                currentProbabilities[x][y] = sensorModel(sonars, x, y) * currentProbabilities[x][y];
             }
 
             //take care of case when we are at a goal
         }
+        currentProbabilities = normalize(currentProbabilities);
 
         return currentProbabilities;
     }
 
+    double[][] zeroGoalStairwells(double[][] probs) {
+        for (int x = 0; x < probs[0].length; x++) {
+            for (int y = 0; y < probs.length; y++) {
+                 if (mundo.grid[x][y] == 2 || mundo.grid[x][y] == 3) {
+                     probs[x][y] = 0;
+                 }
+            }
+        }
+        return probs;
+    }
+
+    double[][] normalize(double[][] probs) {
+        double sum = 0;
+        // double for loop to sum
+        for (int x = 0; x < probs[0].length; x++) {
+            for (int y = 0; y < probs.length; y++) {
+                sum += probs[x][y];
+            }
+        }
+
+        // double for loop to divide each spot by the sum
+        for (int x = 0; x < probs[0].length; x++) {
+            for (int y = 0; y < probs.length; y++) {
+                probs[x][y] = probs[x][y] / sum;
+            }
+        }
+        return probs;
+    }
+
     double transitionModelValue(int action, double[][] previousProbabilities, int x, int y) {
         double totalProbability = 0;
+        double otherActionProb = (1-moveProb) / 4;
 
-        // find prob we are still in this state given the action
+        // check if any neighbors are walls
+//        int numNeighbors = 4;
+        boolean northNeighbor = true;
+        boolean southNeighbor = true;
+        boolean eastNeighbor = true;
+        boolean westNeighbor = true;
 
-        // for each valid neighbor, find probability you are in this state given the action
-
-
-
-        //up
-        int upX = x;
-        int upY = y - 1;
-
-        //down
-        int downX = x;
-        int downY = y + 1;
-
-        //left
-        int leftX = x - 1;
-        int leftY = y;
-
-        //right
-        int rightX = x + 1;
-        int rightY = y;
-
-        double probabilityOfIntendedDirection = moveProb;
-
-        ArrayList<Integer> validDirections = new ArrayList<>();
-
-
-        int numValidDirections = 4;
-        for (int i = 0; i < 4; i++) {
-
-            //direction we intended
-            if (i == action) {
-                continue;
-
-            }
-            //check if there is a wall
-            if (previousProbabilities[upX][upY] == 0) {
-                numValidDirections--;
-            }
-
-            if (previousProbabilities[downX][downY] == 0) {
-                numValidDirections--;
-            }
-
-            if (previousProbabilities[leftX][leftY] == 0) {
-                numValidDirections--;
-            }
-
-            if (previousProbabilities[rightX][rightY] == 0) {
-                numValidDirections--;
-            }
+        if (mundo.grid[x-1][y] == 1) {
+//            numNeighbors--;
+            westNeighbor = false;
+        }
+        if (mundo.grid[x+1][y] == 1) {
+//            numNeighbors--;
+            eastNeighbor = false;
+        }
+        if (mundo.grid[x][y-1] == 1) {
+//            numNeighbors--;
+            northNeighbor = false;
+        }
+        if (mundo.grid[x][y+1] == 1) {
+//            numNeighbors--;
+            southNeighbor = false;
         }
 
-        for (int i = 0; i < 5; i++) {
+        // calculate the probability for each potential action
+        if (action == STAY) {
+            double probOfStaying = moveProb;
 
-            //direction we intended
-            if (i == action) {
-                totalProbability += probabilityOfIntendedDirection * previousProbabilities[x][y];
+            // for each direction, if not wall, calc probability of moving to current spot. else, add to prob of staying
+            if (northNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y-1];
             }
-            //check if there is a wall
-            if (previousProbabilities[upX][upY] == 0) {
-                numValidDirections--;
+            else {
+                probOfStaying += otherActionProb;
             }
-
-            if (previousProbabilities[downX][downY] == 0) {
-                numValidDirections--;
+            if (southNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y+1];
             }
-
-            if (previousProbabilities[leftX][leftY] == 0) {
-                numValidDirections--;
+            else {
+                probOfStaying += otherActionProb;
             }
-
-            if (previousProbabilities[rightX][rightY] == 0) {
-                numValidDirections--;
+            if (eastNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x+1][y];
             }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            // calc prob of staying
+            totalProbability += probOfStaying * previousProbabilities[x][y];
+        }
+        else if (action == NORTH) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y-1];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            if (southNeighbor) {
+                totalProbability += moveProb * previousProbabilities[x][y+1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (eastNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x+1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            totalProbability += probOfStaying * previousProbabilities[x][y];
+        }
+        else if (action == SOUTH) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalProbability += moveProb * previousProbabilities[x][y-1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (southNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y+1];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            if (eastNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x+1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            totalProbability += probOfStaying * previousProbabilities[x][y];
+        }
+        else if (action == EAST) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y-1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (southNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y+1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (eastNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x+1][y];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            if (westNeighbor) {
+                totalProbability += moveProb * previousProbabilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            totalProbability += probOfStaying * previousProbabilities[x][y];
+        }
+        else if (action == WEST) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y-1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (southNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x][y+1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (eastNeighbor) {
+                totalProbability += moveProb * previousProbabilities[x+1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalProbability += otherActionProb * previousProbabilities[x-1][y];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            totalProbability += probOfStaying * previousProbabilities[x][y];
+        }
+        else {
+            System.out.println("WHAT");
         }
 
-        double probOfOtherDirection = (1 - probabilityOfIntendedDirection) / numValidDirections;
-
-//        double previousProbability = previousProbabilities[prevX][prevY];
-
-//        for (int i = 0; i < 4; i++) {
-
-        //All the ways that I can get to this position
-        return 0;
+        return totalProbability;
     }
 
     //p(z|x)
-    double sensorModel(String sonars, int row, int column) {
-        double normalize;
-
-        // normalize = 1 / total probabilities of your states
-
+    double sensorModel(String sonars, int x, int y) {
+        double totalProb = 1;
         //for every direction sonar
-            //if its correct times totalProbability by prob of being correct
-            //if incorrect times prob by prob of being incorrect
 
-        return 0;
+        // NORTH
+        if (sonars.charAt(0) == '1') {
+            if (mundo.grid[x][y-1] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[x][y-1] == 2 || mundo.grid[x][y-1] == 0 || mundo.grid[x][y-1] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        // SOUTH
+        if (sonars.charAt(1) == '1') {
+            if (mundo.grid[x][y+1] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[x][y+1] == 2 || mundo.grid[x][y+1] == 0 || mundo.grid[x][y+1] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        // EAST
+        if (sonars.charAt(2) == '1') {
+            if (mundo.grid[x+1][y] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[x+1][y] == 2 || mundo.grid[x+1][y] == 0 || mundo.grid[x+1][y] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        // WEST
+        if (sonars.charAt(3) == '1') {
+            if (mundo.grid[x-1][y] == 1) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+        else {
+            if (mundo.grid[x-1][y] == 2 || mundo.grid[x-1][y] == 0 || mundo.grid[x-1][y] == 3) {
+                //correct
+                totalProb *= sensorAccuracy;
+            }
+            else {
+                //incorrect
+                totalProb *= (1-sensorAccuracy);
+            }
+        }
+
+        return totalProb;
     }
 
     // This is the function you'd need to write to make the robot move using your AI;
     // You do NOT need to write this function for this lab; it can remain as is
     int automaticAction() {
-        
+
         return STAY;  // default action for now
     }
-    
+
     void doStuff() {
         int action;
-        
+
         //valueIteration();  // TODO: function you will write in Part II of the lab
         initializeProbabilities();  // Initializes the location (probability) map
-        
+
         while (true) {
             try {
                 if (isManual)
                     action = getHumanAction();  // get the action selected by the user (from the keyboard)
                 else
                     action = automaticAction(); // TODO: get the action selected by your AI;
-                                                // you'll need to write this function for part III
-                
+                // you'll need to write this function for part III
+
                 sout.println(action); // send the action to the Server
-                
+
                 // get sonar readings after the robot moves
                 String sonars = sin.readLine();
                 //System.out.println("Sonars: " + sonars);
-            
+
                 updateProbabilities(action, sonars); // TODO: this function should update the probabilities of where the AI thinks it is
-                
+
                 if (sonars.length() > 4) {  // check to see if the robot has reached its goal or fallen down stairs
                     if (sonars.charAt(4) == 'w') {
                         System.out.println("I won!");
@@ -590,7 +799,7 @@ public class theRobot extends JFrame {
                     // was not at the goal or in a stairwell
                 }
                 Thread.sleep(decisionDelay);  // delay that is useful to see what is happening when the AI selects actions
-                                              // decisionDelay is specified by the send command-line argument, which is given in milliseconds
+                // decisionDelay is specified by the send command-line argument, which is given in milliseconds
             }
             catch (IOException e) {
                 System.out.println(e);
