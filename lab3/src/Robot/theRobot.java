@@ -430,10 +430,10 @@ public class theRobot extends JFrame {
             for (int x = 0; x < numCols; x++) {
 
                 // if we hit a wall, it should stay 0
-                if (previousProbabilities[x][y] == 0) {
-                    currentProbabilities[x][y] = 0;
-                    continue;
-                }
+//                if (previousProbabilities[x][y] == 0) {
+//                    currentProbabilities[x][y] = 0;
+//                    continue;
+//                }
 
                 currentProbabilities[x][y] = transitionModelValue(action, previousProbabilities, x, y);
 
