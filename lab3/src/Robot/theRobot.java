@@ -432,6 +432,9 @@ public class theRobot extends JFrame {
 //                    currentProbabilities[x][y] = 0;
 //                    continue;
 //                }
+                if (mundo.grid[x][y] == 1) {
+                    continue;
+                }
 
                 currentProbabilities[x][y] = transitionModelValue(action, previousProbabilities, x, y);
 
@@ -485,19 +488,19 @@ public class theRobot extends JFrame {
         boolean eastNeighbor = true;
         boolean westNeighbor = true;
 
-        if (x-1 <= 0 || mundo.grid[x-1][y] == 0) {
+        if (mundo.grid[x-1][y] == 1) {
 //            numNeighbors--;
             westNeighbor = false;
         }
-        if (x+1 >= mundo.width || mundo.grid[x+1][y] == 0) {
+        if (mundo.grid[x+1][y] == 1) {
 //            numNeighbors--;
             eastNeighbor = false;
         }
-        if (y-1 <= 0 || mundo.grid[x][y-1] == 0) {
+        if (mundo.grid[x][y-1] == 1) {
 //            numNeighbors--;
             northNeighbor = false;
         }
-        if (y+1 >= mundo.height || mundo.grid[x][y+1] == 0) {
+        if (mundo.grid[x][y+1] == 1) {
 //            numNeighbors--;
             southNeighbor = false;
         }
