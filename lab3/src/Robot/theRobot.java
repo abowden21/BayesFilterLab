@@ -408,12 +408,10 @@ public class theRobot extends JFrame {
     // Note: sonars is a bit string with four characters, specifying the sonar reading in the direction of North, South, East, and West
     //       For example, the sonar string 1001, specifies that the sonars found a wall in the North and West directions, but not in the South and East directions
     void updateProbabilities(int action, String sonars) {
-        // your code
         double[][] previousProbabilities = probs.clone();
         probs = bayesFilter(action, sonars, previousProbabilities);
 
-        double moveProb, sensorAccuracy;
-        myMaps.updateProbs(probs); // call this function after updating your probabilities so that the
+          myMaps.updateProbs(probs); // call this function after updating your probabilities so that the
         //  new probabilities will show up in the probability map on the GUI
     }
 
@@ -656,13 +654,13 @@ public class theRobot extends JFrame {
     }
 
     //p(z|x)
-    double sensorModel(String sonars, int row, int column) {
+    double sensorModel(String sonars, int x, int y) {
         double totalProb = 1;
         //for every direction sonar
 
         // NORTH
         if (sonars.charAt(0) == '1') {
-            if (mundo.grid[row-1][column] == 1) {
+            if (mundo.grid[x][y-1] == 1) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
@@ -672,7 +670,7 @@ public class theRobot extends JFrame {
             }
         }
         else {
-            if (mundo.grid[row-1][column] == 2 || mundo.grid[row-1][column] == 0 || mundo.grid[row-1][column] == 3) {
+            if (mundo.grid[x][y-1] == 2 || mundo.grid[x][y-1] == 0 || mundo.grid[x][y-1] == 3) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
@@ -684,7 +682,7 @@ public class theRobot extends JFrame {
 
         // SOUTH
         if (sonars.charAt(1) == '1') {
-            if (mundo.grid[row+1][column] == 1) {
+            if (mundo.grid[x][y+1] == 1) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
@@ -694,7 +692,7 @@ public class theRobot extends JFrame {
             }
         }
         else {
-            if (mundo.grid[row+1][column] == 2 || mundo.grid[row+1][column] == 0 || mundo.grid[row+1][column] == 3) {
+            if (mundo.grid[x][y+1] == 2 || mundo.grid[x][y+1] == 0 || mundo.grid[x][y+1] == 3) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
@@ -706,7 +704,7 @@ public class theRobot extends JFrame {
 
         // EAST
         if (sonars.charAt(2) == '1') {
-            if (mundo.grid[row][column+1] == 1) {
+            if (mundo.grid[x+1][y] == 1) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
@@ -716,7 +714,7 @@ public class theRobot extends JFrame {
             }
         }
         else {
-            if (mundo.grid[row][column+1] == 2 || mundo.grid[row][column+1] == 0 || mundo.grid[row][column+1] == 3) {
+            if (mundo.grid[x+1][y] == 2 || mundo.grid[x+1][y] == 0 || mundo.grid[x+1][y] == 3) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
@@ -728,7 +726,7 @@ public class theRobot extends JFrame {
 
         // WEST
         if (sonars.charAt(3) == '1') {
-            if (mundo.grid[row][column-1] == 1) {
+            if (mundo.grid[x-1][y] == 1) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
@@ -738,7 +736,7 @@ public class theRobot extends JFrame {
             }
         }
         else {
-            if (mundo.grid[row][column-1] == 2 || mundo.grid[row][column-1] == 0 || mundo.grid[row][column-1] == 3) {
+            if (mundo.grid[x-1][y] == 2 || mundo.grid[x-1][y] == 0 || mundo.grid[x-1][y] == 3) {
                 //correct
                 totalProb *= sensorAccuracy;
             }
