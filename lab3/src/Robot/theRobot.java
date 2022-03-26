@@ -1,4 +1,6 @@
 package Robot;
+import javafx.util.Pair;
+
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.Color;
@@ -274,6 +276,15 @@ public class theRobot extends JFrame {
     // store your computed value of being in each state (x, y)
     double[][] Vs;
 
+    double[][] rewards;
+    double[][] utilities;
+    int[][] policy;
+    double gamma = .95;
+    double wallReward = 0;
+    double stairwellReward = -100;
+    double goalReward = 50;
+    double errorBound = .0001;
+
     public theRobot(String _manual, int _decisionDelay) {
         // initialize variables as specified from the command-line
         if (_manual.equals("automatic"))
@@ -301,6 +312,8 @@ public class theRobot extends JFrame {
 
         setVisible(true);
         setTitle("Probability and Value Maps");
+
+        initializeRewards();
 
         doStuff(); // Function to have the robot move about its world until it gets to its goal or falls in a stairwell
     }
@@ -755,15 +768,165 @@ public class theRobot extends JFrame {
     // This is the function you'd need to write to make the robot move using your AI;
     // You do NOT need to write this function for this lab; it can remain as is
     int automaticAction() {
+        valueIteration(); // do this here?
+        // return optimal policy for current state
+        Pair<Integer, Integer> currState = getCurrentState();
+        return policy[currState.getKey()][currState.getValue()];  // default action for now
+    }
 
-        return STAY;  // default action for now
+    Pair<Integer, Integer> getCurrentState() {
+        double maxProb = Double.NEGATIVE_INFINITY;
+        int currX = -1;
+        int currY = -1;
+        for (int x = 0; x < mundo.width; x++) {
+            for (int y = 0; y < mundo.height; y++) {
+                if (probs[x][y] > maxProb) {
+                    maxProb = probs[x][y];
+                    currX = x;
+                    currY = y;
+                }
+            }
+        }
+        return new Pair<>(currX, currY);
+    }
+
+    void initializeRewards() {
+        rewards = new double[mundo.width][mundo.height];
+        for (int x = 0; x < mundo.width; x++) {
+            for (int y = 0; y < mundo.height; y++) {
+                if (mundo.grid[x][y] == 1) {
+                    rewards[x][y] = wallReward; // wall
+                }
+                else if (mundo.grid[x][y] == 2) {
+                    rewards[x][y] = stairwellReward; // stairwell
+                }
+                else if (mundo.grid[x][y] == 3) {
+                    rewards[x][y] = goalReward; // goal
+                }
+                else {
+                    rewards[x][y] = -1; // normal state
+                }
+            }
+        }
+    }
+
+    void initializeUtilities() {
+        utilities = new double[mundo.width][mundo.height];
+        for (int x = 0; x < mundo.width; x++) {
+            for (int y = 0; y < mundo.height; y++) {
+                if (mundo.grid[x][y] == 1) {
+                    utilities[x][y] = Double.NEGATIVE_INFINITY; // wall
+                }
+                else if (mundo.grid[x][y] == 2) {
+                    utilities[x][y] = stairwellReward; // stairwell
+                }
+                else if (mundo.grid[x][y] == 3) {
+                    utilities[x][y] = goalReward; // goal
+                }
+                else {
+                    utilities[x][y] = 0; // normal state
+                }
+            }
+        }
+    }
+
+    void initializePolicy() {
+        policy = new int[mundo.width][mundo.height];
+        for (int x = 0; x < mundo.width; x++) {
+            for (int y = 0; y < mundo.height; y++) {
+                if (mundo.grid[x][y] == 0) {
+                    policy[x][y] = STAY; // normal square
+                }
+                else {
+                    policy[x][y] = -1; // terminals and walls
+                }
+            }
+        }
+    }
+
+    void valueIteration() {
+
+        initializePolicy();
+        initializeUtilities();
+
+        boolean continueVal;
+        do {
+            continueVal = false;
+            double[][] nextUtilities = utilities.clone();
+            for (int x = 0; x < mundo.width; x++) {
+                for (int y = 0; y < mundo.height; y++) {
+                    if (mundo.grid[x][y] == 0) {
+                        nextUtilities[x][y] = getUtility(x, y);
+                        if (Math.abs(utilities[x][y] - nextUtilities[x][y]) > errorBound) {
+                            continueVal = true;
+                        }
+                    }
+                }
+            }
+
+            utilities = nextUtilities;
+        } while (continueVal);
+
+    }
+
+    double getMaxUtility(int x, int y) {
+        double leftProb = transitionModelValue(WEST, probs, x, y);
+        double rightProb = transitionModelValue(EAST, probs, x, y);
+        double upProb = transitionModelValue(NORTH, probs, x, y);
+        double downProb = transitionModelValue(SOUTH, probs, x, y);
+        double stayProb = transitionModelValue(STAY, probs, x, y);
+        double leftUtility = utilities[x-1][y];
+        double rightUtility = utilities[x+1][y];
+        double upUtility = utilities[x][y-1];
+        double downUtility = utilities[x][y+1];
+        double stayUtility = utilities[x][y];
+
+        Pair<Double, Double> left = new Pair<>(leftProb, leftUtility);
+        Pair<Double, Double> right = new Pair<>(rightProb, rightUtility);
+        Pair<Double, Double> up = new Pair<>(upProb, upUtility);
+        Pair<Double, Double> down = new Pair<>(downProb, downUtility);
+        Pair<Double, Double> stay = new Pair<>(stayProb, stayUtility);
+
+        ArrayList<Pair<Double, Double>> probs = new ArrayList<>();
+
+        probs.add(up);
+        probs.add(down);
+        probs.add(left);
+        probs.add(right);
+        probs.add(stay);
+
+        int bestDirection = 0;
+        double maxUtility = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < 5; i++) {
+            if (probs.get(i).getValue() == Double.NEGATIVE_INFINITY) {
+                //probs.set(i, new Pair<>(probs.get(i).getKey(), stayProb));
+                continue;
+            }
+            if (probs.get(i).getKey() * probs.get(i).getValue() > maxUtility) {
+                maxUtility = probs.get(i).getKey() * probs.get(i).getValue();
+                bestDirection = i;
+            }
+        }
+        policy[x][y] = bestDirection;
+
+        return maxUtility;
+    }
+
+    double getUtility(int x, int y) {
+        // check each adjacent state - get probability of getting to that state * utility of that state
+        //in a for loop, keep track of max
+        double maxUtility = getMaxUtility(x, y);
+
+        // this is basic version, need to implement transition model probability - sum of possible states and
+        //their respective utilities
+        return rewards[x][y] + gamma * maxUtility;
     }
 
     void doStuff() {
         int action;
 
-        //valueIteration();  // TODO: function you will write in Part II of the lab
         initializeProbabilities();  // Initializes the location (probability) map
+        valueIteration();  // TODO: function you will write in Part II of the lab
 
         while (true) {
             try {
