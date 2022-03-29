@@ -421,7 +421,7 @@ public class theRobot extends JFrame {
     // Note: sonars is a bit string with four characters, specifying the sonar reading in the direction of North, South, East, and West
     //       For example, the sonar string 1001, specifies that the sonars found a wall in the North and West directions, but not in the South and East directions
     void updateProbabilities(int action, String sonars) {
-        double[][] previousProbabilities = probs.clone();
+        double[][] previousProbabilities = deepCopy(probs);
         probs = bayesFilter(action, sonars, previousProbabilities);
 
           myMaps.updateProbs(probs); // call this function after updating your probabilities so that the
@@ -768,11 +768,194 @@ public class theRobot extends JFrame {
     // This is the function you'd need to write to make the robot move using your AI;
     // You do NOT need to write this function for this lab; it can remain as is
     int automaticAction() {
-        valueIteration(); // do this here?
         // return optimal policy for current state
         Pair<Integer, Integer> currState = getCurrentState();
         return policy[currState.getKey()][currState.getValue()];  // default action for now
     }
+
+    double[][] deepCopy(double[][] myArray) {
+        return java.util.Arrays.stream(myArray).map(el -> el.clone()).toArray($ -> myArray.clone());
+    }
+
+    double utilityTransitionModel(int action, double[][] utilities, int x, int y) {
+        double totalUtility = 0;
+        double otherActionProb = (1-moveProb) / 4;
+
+        // check if any neighbors are walls
+//        int numNeighbors = 4;
+        boolean northNeighbor = true;
+        boolean southNeighbor = true;
+        boolean eastNeighbor = true;
+        boolean westNeighbor = true;
+
+        if (mundo.grid[x-1][y] == 1) {
+//            numNeighbors--;
+            westNeighbor = false;
+        }
+        if (mundo.grid[x+1][y] == 1) {
+//            numNeighbors--;
+            eastNeighbor = false;
+        }
+        if (mundo.grid[x][y-1] == 1) {
+//            numNeighbors--;
+            northNeighbor = false;
+        }
+        if (mundo.grid[x][y+1] == 1) {
+//            numNeighbors--;
+            southNeighbor = false;
+        }
+
+        // calculate the probability for each potential action
+        if (action == STAY) {
+            double probOfStaying = moveProb;
+
+            // for each direction, if not wall, calc probability of moving to current spot. else, add to prob of staying
+            if (northNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y-1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (southNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y+1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (eastNeighbor) {
+                totalUtility += otherActionProb * utilities[x+1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalUtility += otherActionProb * utilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            // calc prob of staying
+            totalUtility += probOfStaying * utilities[x][y];
+        }
+        else if (action == NORTH) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalUtility += moveProb * utilities[x][y-1];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            if (southNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y+1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (eastNeighbor) {
+                totalUtility += otherActionProb * utilities[x+1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalUtility += otherActionProb * utilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            totalUtility += probOfStaying * utilities[x][y];
+        }
+        else if (action == SOUTH) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y-1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (southNeighbor) {
+                totalUtility += moveProb * utilities[x][y+1];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            if (eastNeighbor) {
+                totalUtility += otherActionProb * utilities[x+1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalUtility += otherActionProb * utilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            totalUtility += probOfStaying * utilities[x][y];
+        }
+        else if (action == EAST) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y-1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (southNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y+1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (eastNeighbor) {
+                totalUtility += moveProb * utilities[x+1][y];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            if (westNeighbor) {
+                totalUtility += otherActionProb * utilities[x-1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            totalUtility += probOfStaying * utilities[x][y];
+        }
+        else if (action == WEST) {
+            double probOfStaying = otherActionProb;
+            if (northNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y-1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (southNeighbor) {
+                totalUtility += otherActionProb * utilities[x][y+1];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (eastNeighbor) {
+                totalUtility += otherActionProb * utilities[x+1][y];
+            }
+            else {
+                probOfStaying += otherActionProb;
+            }
+            if (westNeighbor) {
+                totalUtility += moveProb * utilities[x-1][y];
+            }
+            else {
+                probOfStaying += moveProb;
+            }
+            totalUtility += probOfStaying * utilities[x][y];
+        }
+        else {
+            System.out.println("WHAT");
+        }
+
+        return totalUtility;
+    }
+
 
     Pair<Integer, Integer> getCurrentState() {
         double maxProb = Double.NEGATIVE_INFINITY;
@@ -852,7 +1035,7 @@ public class theRobot extends JFrame {
         boolean continueVal;
         do {
             continueVal = false;
-            double[][] nextUtilities = utilities.clone();
+            double[][] nextUtilities = deepCopy(utilities);
             for (int x = 0; x < mundo.width; x++) {
                 for (int y = 0; y < mundo.height; y++) {
                     if (mundo.grid[x][y] == 0) {
@@ -870,40 +1053,40 @@ public class theRobot extends JFrame {
     }
 
     double getMaxUtility(int x, int y) {
-        double leftProb = transitionModelValue(WEST, probs, x, y);
-        double rightProb = transitionModelValue(EAST, probs, x, y);
-        double upProb = transitionModelValue(NORTH, probs, x, y);
-        double downProb = transitionModelValue(SOUTH, probs, x, y);
-        double stayProb = transitionModelValue(STAY, probs, x, y);
-        double leftUtility = utilities[x-1][y];
-        double rightUtility = utilities[x+1][y];
-        double upUtility = utilities[x][y-1];
-        double downUtility = utilities[x][y+1];
-        double stayUtility = utilities[x][y];
+        double left = utilityTransitionModel(WEST, utilities, x, y);
+        double right = utilityTransitionModel(EAST, utilities, x, y);
+        double up = utilityTransitionModel(NORTH, utilities, x, y);
+        double down = utilityTransitionModel(SOUTH, utilities, x, y);
+        double stay = utilityTransitionModel(STAY, utilities, x, y);
+//        double leftUtility = utilities[x-1][y];
+//        double rightUtility = utilities[x+1][y];
+//        double upUtility = utilities[x][y-1];
+//        double downUtility = utilities[x][y+1];
+//        double stayUtility = utilities[x][y];
 
-        Pair<Double, Double> left = new Pair<>(leftProb, leftUtility);
-        Pair<Double, Double> right = new Pair<>(rightProb, rightUtility);
-        Pair<Double, Double> up = new Pair<>(upProb, upUtility);
-        Pair<Double, Double> down = new Pair<>(downProb, downUtility);
-        Pair<Double, Double> stay = new Pair<>(stayProb, stayUtility);
+//        Pair<Double, Double> left = new Pair<>(leftProb, leftUtility);
+//        Pair<Double, Double> right = new Pair<>(rightProb, rightUtility);
+//        Pair<Double, Double> up = new Pair<>(upProb, upUtility);
+//        Pair<Double, Double> down = new Pair<>(downProb, downUtility);
+//        Pair<Double, Double> stay = new Pair<>(stayProb, stayUtility);
 
-        ArrayList<Pair<Double, Double>> probs = new ArrayList<>();
+        ArrayList<Double> myUtilities = new ArrayList<>();
 
-        probs.add(up);
-        probs.add(down);
-        probs.add(left);
-        probs.add(right);
-        probs.add(stay);
+        myUtilities.add(up);
+        myUtilities.add(down);
+        myUtilities.add(right);
+        myUtilities.add(left);
+        myUtilities.add(stay);
 
         int bestDirection = 0;
         double maxUtility = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < 5; i++) {
-            if (probs.get(i).getValue() == Double.NEGATIVE_INFINITY) {
-                //probs.set(i, new Pair<>(probs.get(i).getKey(), stayProb));
+            if (myUtilities.get(i) == Double.NEGATIVE_INFINITY) {
+                //myUtilities.set(i, new Pair<>(myUtilities.get(i).getKey(), stayProb));
                 continue;
             }
-            if (probs.get(i).getKey() * probs.get(i).getValue() > maxUtility) {
-                maxUtility = probs.get(i).getKey() * probs.get(i).getValue();
+            if (myUtilities.get(i) > maxUtility) {
+                maxUtility = myUtilities.get(i);
                 bestDirection = i;
             }
         }
@@ -919,6 +1102,9 @@ public class theRobot extends JFrame {
 
         // this is basic version, need to implement transition model probability - sum of possible states and
         //their respective utilities
+        if (maxUtility == -1) {
+            return rewards[x][y];
+        }
         return rewards[x][y] + gamma * maxUtility;
     }
 
